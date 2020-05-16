@@ -40,6 +40,12 @@ button:hover {
     margin-top: 0;
     font-weight: 400;
     font-size: 14px;
+    max-width: 212px;
+    height: 16px;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    padding-top: 5px;
 }
 .locations {
     height: 100%;
@@ -71,7 +77,7 @@ button:hover {
 .amenities .popover {
     padding: 10px 0;
     margin-left: -5px;
-    margin-top: 0%;
+    margin-top: -4px;
 }
 
 .amenities .popover ul{
@@ -79,7 +85,7 @@ button:hover {
 }
 
 .locations .popover {
-    margin-top: 0%;
+    margin-top: -4px;
 }
 .popover ul {
     list-style-type: none;
