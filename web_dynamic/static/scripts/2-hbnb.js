@@ -1,32 +1,32 @@
-let checkedAmenities = {};
-let h4 = $('.amenities h4');
+const checkedAmenities = {};
+const h4 = $('.amenities h4');
 $(document).ready(function () {
-  $('.amenities .popover ul li :input').each(function(i) {
-    let item = $(this)[0];
+  $('.amenities .popover ul li :input').each(function (i) {
+    const item = $(this)[0];
     item.onchange = function (e) {
-      let itemId = item.getAttribute('data-id');
-      if (!checkedAmenities.hasOwnProperty(itemId)) {
-	checkedAmenities[itemId] = item.getAttribute('data-name');
+      const itemId = item.getAttribute('data-id');
+      if (!(itemId in checkedAmenities)) {
+        checkedAmenities[itemId] = item.getAttribute('data-name');
       } else {
-	delete checkedAmenities[itemId];
+        delete checkedAmenities[itemId];
       }
       let str = '';
-      let names = Object.values(checkedAmenities);
+      const names = Object.values(checkedAmenities);
       for (let i = 0; i < names.length; i++) {
-	str += names[i];
-	if (i < names.length - 1) {
-	  str += ', ';
-	}
+        str += names[i];
+        if (i < names.length - 1) {
+          str += ', ';
+        }
       }
-      $('.amenities h4').html(str);
-    }
+      h4.html(str);
+    };
   });
   const url = 'http://0.0.0.0:5001/api/v1/status/';
   $.getJSON(url, function (data) {
-  if (data.status === 'OK') {
-  $('#api_status').addClass('available');
-  } else {
-    $('#api_status').removeClass('available');
-  }
+    if (data.status === 'OK') {
+      $('#api_status').addClass('available');
+    } else {
+      $('#api_status').removeClass('available');
+    }
   });
 });

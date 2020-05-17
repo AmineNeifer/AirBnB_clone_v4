@@ -30,6 +30,8 @@ function placeHtml (place) {
 }
 
 $(document).ready(function () {
+  const sectionPlaces = $('SECTION.places');
+  const btn = $('.filters button');
   $('.amenities .popover ul li :input').each(function (i) {
     const item = $(this)[0];
     item.onchange = function (e) {
@@ -40,10 +42,10 @@ $(document).ready(function () {
         delete checkedAmenities[itemId];
       }
       let str = '';
-      const names = Object.values(checkedAmenities);
-      for (let i = 0; i < names.length; i++) {
-        str += names[i];
-        if (i < names.length - 1) {
+      const amenityNames = Object.values(checkedAmenities);
+      for (let i = 0; i < amenityNames.length; i++) {
+        str += amenityNames[i];
+        if (i < amenityNames.length - 1) {
           str += ', ';
         }
       }
@@ -66,8 +68,23 @@ $(document).ready(function () {
     contentType: 'application/json',
     success: function (data) {
       for (const place of data) {
-        $('SECTION.places').append(placeHtml(place));
+        sectionPlaces.append(placeHtml(place));
       }
     }
+  });
+
+  btn.click(function () {
+    $.ajax({
+      url: placeSearchURL,
+      type: 'POST',
+      data: JSON.stringify({ amenities: Object.keys(checkedAmenities) }),
+      contentType: 'application/json',
+      success: function (data) {
+        sectionPlaces.html('');
+        for (const place of data) {
+          sectionPlaces.append(placeHtml(place));
+        }
+      }
+    });
   });
 });
