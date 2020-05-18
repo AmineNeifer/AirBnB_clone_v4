@@ -14,33 +14,37 @@ function getReviews (reviewSpan) {
   const getReviewsURL = 'http://0.0.0.0:5001/api/v1/places/' + placeId + '/reviews';
   if (spanText === 'Show') {
     $.ajax({
-      async: false,
+      async: true,
       url: getReviewsURL,
       type: 'GET',
       contentType: 'application/json',
       success: function (data) {
-        reviews = data;
+        if ($.trim(data)) {
+          reviews = data;
+          for (let i = 0; i < reviews.length; i++) {
+            $.ajax({
+              async: false,
+              url: getUserURL + reviews[i].user_id,
+              type: 'GET',
+              contentType: 'application/json',
+              success: function (data) {
+                reviews[i].header = 'From ' + data.first_name + ' ' +
+                data.last_name + ' ' + dayjs(data.updated_at).format('MMMM D YYYY');
+              }
+            });
+          }
+
+          $.each(reviews, (i, review) => {
+            ulItems += '<li><h3>' + review.header + '</h3><p>' + review.text + '</p></li>';
+          });
+
+          $(ul).html(ulItems);
+        } else {
+          $(ul).html('<h4>This place has no reviews yet.</h4>');
+        }
+        $(reviewSpan).text('Hide');
       }
     });
-    for (let i = 0; i < reviews.length; i++) {
-      $.ajax({
-        async: false,
-        url: getUserURL + reviews[i].user_id,
-        type: 'GET',
-        contentType: 'application/json',
-        success: function (data) {
-          reviews[i].header = 'From ' + data.first_name + ' ' +
-          data.last_name + ' ' + dayjs(data.updated_at).format('MMMM D YYYY');
-        }
-      });
-    }
-
-    $.each(reviews, (i, review) => {
-      ulItems += '<li><h3>' + review.header + '</h3><p>' + review.text + '</p></li>';
-    });
-
-    $(ul).html(ulItems);
-    $(reviewSpan).text('Hide');
   } else {
     $(ul).html('');
     $(reviewSpan).text('Show');
