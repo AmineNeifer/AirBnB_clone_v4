@@ -3,35 +3,48 @@ const checkedStates = {};
 const checkedCities = {};
 const placeSearchURL = 'http://0.0.0.0:5001/api/v1/places_search/';
 const statusURL = 'http://0.0.0.0:5001/api/v1/status/';
+const getUserURL = 'http://0.0.0.0:5001/api/v1/users/';
 
-
-function getReviews (place_id) {
+function getReviews (reviewSpan) {
+  const spanText = $(reviewSpan).text();
+  const placeId = reviewSpan.getAttribute('data-place-id');
+  const ul = reviewSpan.parentElement.parentElement.getElementsByTagName('ul')[0];
   let reviews;
-  const getReviewsURL = 'http://0.0.0.0:5001/api/v1/places/' + place_id + '/reviews';
-  const getUserURL = 'http://0.0.0.0:5001/api/v1/users/';
-  $.ajax({
-    async: false,
-    url: getReviewsURL,
-    type: 'GET',
-    contentType: 'application/json',
-    success: function (data) {
-      reviews = data;
-    }
-  });
-  for (let i = 0; i < reviews.length; i++) {
+  let ulItems = '';
+  const getReviewsURL = 'http://0.0.0.0:5001/api/v1/places/' + placeId + '/reviews';
+  if (spanText === 'Show') {
     $.ajax({
       async: false,
-      url: getUserURL + reviews[i].user_id,
+      url: getReviewsURL,
       type: 'GET',
       contentType: 'application/json',
       success: function (data) {
-        console.log(moment(data.updated_at, 'MMMM Do YYYY'));
-        reviews[i].userName = data.first_name + ' ' + data.last_name;
+        reviews = data;
       }
     });
+    for (let i = 0; i < reviews.length; i++) {
+      $.ajax({
+        async: false,
+        url: getUserURL + reviews[i].user_id,
+        type: 'GET',
+        contentType: 'application/json',
+        success: function (data) {
+          reviews[i].header = 'From ' + data.first_name + ' ' +
+          data.last_name + ' ' + dayjs(data.updated_at).format('MMMM D YYYY');
+        }
+      });
+    }
+
+    $.each(reviews, (i, review) => {
+      ulItems += '<li><h3>' + review.header + '</h3><p>' + review.text + '</p></li>';
+    });
+
+    $(ul).html(ulItems);
+    $(reviewSpan).text('Hide');
+  } else {
+    $(ul).html('');
+    $(reviewSpan).text('Show');
   }
-  console.log(reviews);
-  return reviews;
 }
 
 function placeHtml (place) {
@@ -44,7 +57,6 @@ function placeHtml (place) {
         <h2>${place.name}</h2>
         <div class="price_by_night">$${place.price_by_night}</div>
       </div>
-
       <div class="information">
         <div class="max_guest">${place.max_guest} ${guest}</div>
             <div class="number_rooms">${place.number_rooms} ${bedroom}</div>
@@ -58,21 +70,16 @@ function placeHtml (place) {
       : ''
     }
     <div class="reviews">
-    <h2>Reviews <span>Show</span></h2>
-       	<ul>
-			<li>
-				<h3>From Jordan Peterson the 9th November 2014</h3>
-				<p>I had a great time witsdh family, I highly recommend it four a family gathering.</p>
-			</li>
-		</ul>
-	  </div>
-    </article>`;
-  getReviews(place.id);
+      <h2>Reviews
+          <span class="toggle-reviews" data-place-id=${place.id} onclick="getReviews(this)">Show</span>
+      </h2>
+      <ul></ul>
+    </div>
+  </article>`;
   return html;
 }
 
 $(document).ready(function () {
-  const moment = moment();
   const sectionPlaces = $('SECTION.places');
   const btn = $('.filters button');
 
