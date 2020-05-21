@@ -1,5 +1,4 @@
 const checkedAmenities = {};
-const h4 = $('.amenities h4');
 $(document).ready(function () {
   $('.amenities .popover ul li :input').each(function (i) {
     const item = $(this)[0];
@@ -18,7 +17,7 @@ $(document).ready(function () {
           str += ', ';
         }
       }
-      h4.html(str);
+      $('.amenities h4').html(str);
     };
   });
   const url = 'http://0.0.0.0:5001/api/v1/status/';
